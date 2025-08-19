@@ -15,17 +15,18 @@ export default function Slide() {
   - Per-component scaling, health checks, zero-downtime deploys and instant rollbacks
   - Secrets and env vars, VPC to Managed Databases/Redis, custom domains + HTTPS
   - Logs, metrics, alerts built-in; cron jobs and workers for async tasks
-\`\`\`mermaid flowchart LR
-  A[Monorepo on GitHub/GitLab] --> B[App Platform\nBuildpacks + App Spec]
-  B --> C[Static Site (Jamstack)]
-  B --> D[API Service(s)]
-  B --> E[Worker / Cron Job]
-  D --> F[(Managed Database / Redis via VPC)]
-  E --> F
-  C -->|Calls| D
-  C --> G[Global CDN + HTTPS]
-  B --> H[PR Previews\nLogs/Metrics\nRollbacks\nAutoscaling]
-  C --> I[Users]
+\`\`\`mermaid 
+  flowchart LR
+    A[Monorepo on GitHub/GitLab] --> B[App Platform\nBuildpacks + App Spec]
+    B --> C[Static Site (Jamstack)]
+    B --> D[API Service(s)]
+    B --> E[Worker / Cron Job]
+    D --> F[(Managed Database / Redis via VPC)]
+    E --> F
+    C -->|Calls| D
+    C --> G[Global CDN + HTTPS]
+    B --> H[PR Previews\nLogs/Metrics\nRollbacks\nAutoscaling]
+    C --> I[Users]
 \`\`\`
 - Result: One pipeline, many components; fewer YAMLs, no cluster wrangling—just push code and ship.`;
   const mermaidRef = useRef(0);

@@ -10,25 +10,26 @@ export default function Slide() {
   - You push to Git or point at a container image
   - App Platform builds (Buildpacks or Docker) → creates a container image → deploys behind a managed load balancer → scales based on your settings
   - Zero-downtime rollouts with health checks and instant rollback on failure
-\`\`\`mermaid flowchart LR
-  Dev[git push] --> Repo[GitHub/GitLab]
-  Dev -. or .-> ImgSrc[Container Image in DOCR/Docker Hub]
-  Repo -->|Webhook| AP[DigitalOcean App Platform]
-  ImgSrc --> AP
-  AP --> Detect{Build method?}
-  Detect -->|Source code| BP[Cloud Native Buildpacks]
-  Detect -->|Dockerfile/Image| DK[Docker build or pull]
-  BP --> IMG[Container image]
-  DK --> IMG
-  IMG --> REG[Registry (internal/DOCR)]
-  REG --> DEPLOY[Provision app instances]
-  DEPLOY --> HC[Health checks]
-  HC -->|healthy| SWITCH[Zero-downtime traffic switch]
-  HC -->|fail| ROLLBACK[Automatic rollback]
-  SWITCH --> LB[Managed HTTPS LB + CDN]
-  LB --> USERS[(Users)]
-  DEPLOY --> SCALE[Scale: instance count + size + autoscale]
-  SCALE --> OBS[Logs & metrics]
+\`\`\`mermaid 
+  flowchart LR
+    Dev[git push] --> Repo[GitHub/GitLab]
+    Dev -. or .-> ImgSrc[Container Image in DOCR/Docker Hub]
+    Repo -->|Webhook| AP[DigitalOcean App Platform]
+    ImgSrc --> AP
+    AP --> Detect{Build method?}
+    Detect -->|Source code| BP[Cloud Native Buildpacks]
+    Detect -->|Dockerfile/Image| DK[Docker build or pull]
+    BP --> IMG[Container image]
+    DK --> IMG
+    IMG --> REG[Registry (internal/DOCR)]
+    REG --> DEPLOY[Provision app instances]
+    DEPLOY --> HC[Health checks]
+    HC -->|healthy| SWITCH[Zero-downtime traffic switch]
+    HC -->|fail| ROLLBACK[Automatic rollback]
+    SWITCH --> LB[Managed HTTPS LB + CDN]
+    LB --> USERS[(Users)]
+    DEPLOY --> SCALE[Scale: instance count + size + autoscale]
+    SCALE --> OBS[Logs & metrics]
 \`\`\`
 Build phase
 - Buildpacks path (no Dockerfile needed):
