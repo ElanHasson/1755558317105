@@ -12,18 +12,17 @@ export default function Slide() {
   - Networking/costs: Watch egress. Place components and databases in the same region/VPC, cache aggressively, and use a CDN for static assets.
   - Secrets/config: Never commit secrets. Use App secrets/env vars and rotate regularly.
 
-\`\`\`mermaid
-flowchart LR
-A[Gotcha] --> B[Ephemeral FS]
-B --> Bfix[Use Managed DBs/Redis/Spaces]
-A --> C[Long requests]
-C --> Cfix[Workers + queues; stream]
-A --> D[Autoscale lag]
-D --> Dfix[Min instances + health checks + load test]
-A --> E[Build/deploy]
-E --> Efix[Dockerfile or pin runtime; staging]
-A --> F[Egress/region]
-F --> Ffix[Same region/VPC + CDN + cache]
+\`\`\`mermaid flowchart LR
+  A[Gotcha] --> B[Ephemeral FS]
+  B --> Bfix[Use Managed DBs/Redis/Spaces]
+  A --> C[Long requests]
+  C --> Cfix[Workers + queues; stream]
+  A --> D[Autoscale lag]
+  D --> Dfix[Min instances + health checks + load test]
+  A --> E[Build/deploy]
+  E --> Efix[Dockerfile or pin runtime; staging]
+  A --> F[Egress/region]
+  F --> Ffix[Same region/VPC + CDN + cache]
 \`\`\`
 
 - Trends to watch

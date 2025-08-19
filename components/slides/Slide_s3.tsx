@@ -73,8 +73,7 @@ doctl apps logs $APP_ID --component web --type run --follow
 
 A quick look at the flow
 
-\`\`\`mermaid
-flowchart LR
+\`\`\`mermaid flowchart LR
     A(Code push / Spec apply) --> B[Pre-deploy Job: migrate-db]
     B -->|Success| C[Start Web]
     B -->|Success| D[Start Worker]

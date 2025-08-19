@@ -9,8 +9,7 @@ export default function Slide() {
   - App Platform builds (Buildpacks or Docker) → creates a container image → deploys behind a managed load balancer → scales based on your settings
   - Zero-downtime rollouts with health checks and instant rollback on failure
 
-\`\`\`mermaid
-flowchart LR
+\`\`\`mermaid flowchart LR
   Dev[git push] --> Repo[GitHub/GitLab]
   Dev -. or .-> ImgSrc[Container Image in DOCR/Docker Hub]
   Repo -->|Webhook| AP[DigitalOcean App Platform]

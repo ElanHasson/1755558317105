@@ -15,8 +15,7 @@ export default function Slide() {
   - Secrets and env vars, VPC to Managed Databases/Redis, custom domains + HTTPS
   - Logs, metrics, alerts built-in; cron jobs and workers for async tasks
 
-\`\`\`mermaid
-flowchart LR
+\`\`\`mermaid flowchart LR
   A[Monorepo on GitHub/GitLab] --> B[App Platform\nBuildpacks + App Spec]
   B --> C[Static Site (Jamstack)]
   B --> D[API Service(s)]
