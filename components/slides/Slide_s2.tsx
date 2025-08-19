@@ -2,13 +2,14 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function Slide() {
   const markdown = `- What actually happens from commit to scale-up
   - You push to Git or point at a container image
   - App Platform builds (Buildpacks or Docker) → creates a container image → deploys behind a managed load balancer → scales based on your settings
   - Zero-downtime rollouts with health checks and instant rollback on failure
-
 \`\`\`mermaid flowchart LR
   Dev[git push] --> Repo[GitHub/GitLab]
   Dev -. or .-> ImgSrc[Container Image in DOCR/Docker Hub]
@@ -29,7 +30,6 @@ export default function Slide() {
   DEPLOY --> SCALE[Scale: instance count + size + autoscale]
   SCALE --> OBS[Logs & metrics]
 \`\`\`
-
 Build phase
 - Buildpacks path (no Dockerfile needed):
   - Auto-detects language/runtime (Node, Python, Go, Ruby, Java, PHP, static sites)
@@ -116,12 +116,21 @@ CMD ["node", "server.js"]
       <ReactMarkdown 
         remarkPlugins={[remarkGfm]}
         components={{
-          code({node, className, children, ...props}: any) {
-            const match = /language-(w+)/.exec(className || '');
+          code({node, inline, className, children, ...props}: any) {
+            const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';
-            const isInline = !className;
             
-            if (!isInline && language === 'mermaid') {
+            // Handle inline code
+            if (inline) {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+            
+            // Handle mermaid diagrams
+            if (language === 'mermaid') {
               return (
                 <pre className="language-mermaid">
                   <code>{String(children).replace(/\n$/, '')}</code>
@@ -129,10 +138,28 @@ CMD ["node", "server.js"]
               );
             }
             
+            // Handle code blocks with syntax highlighting
+            if (language) {
+              return (
+                <SyntaxHighlighter
+                  language={language}
+                  style={atomDark}
+                  showLineNumbers={true}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              );
+            }
+            
+            // Default code block without highlighting
             return (
-              <code className={className} {...props}>
-                {children}
-              </code>
+              <pre>
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </pre>
             );
           }
         }}

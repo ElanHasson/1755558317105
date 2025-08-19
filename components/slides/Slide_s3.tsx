@@ -2,13 +2,14 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function Slide() {
   const markdown = `- Goal: Ship a Web service + background Worker + one‑time DB Migration with a single App Spec
 - What you’ll see: One YAML, one command, auto‑ordered deploy (migrations run before app boots)
 
 App Spec (minimal example)
-
 \`\`\`yaml
 name: web-worker-migrate
 region: nyc
@@ -49,9 +50,7 @@ jobs:
     environment_slug: node-js
     run_command: "npm run migrate"
 \`\`\`
-
 Deploy from the CLI
-
 \`\`\`bash
 # Create the app from spec
 export DO_TOKEN=...   # or already logged in via \`doctl auth init\`
@@ -70,9 +69,7 @@ doctl apps logs $APP_ID --component migrate-db --type run --follow
 # Web and worker runtime logs
 doctl apps logs $APP_ID --component web --type run --follow
 \`\`\`
-
 A quick look at the flow
-
 \`\`\`mermaid flowchart LR
     A(Code push / Spec apply) --> B[Pre-deploy Job: migrate-db]
     B -->|Success| C[Start Web]
@@ -81,7 +78,6 @@ A quick look at the flow
     C --> E[Routes live]
     D --> F[Background tasks running]
 \`\`\`
-
 Notes
 - Secrets/DB URLs: add in App Platform UI or as encrypted env vars; App Spec picks them up at deploy
 - Roll forward on push; redeploy/rollback available from UI; no servers to manage`;
@@ -135,12 +131,21 @@ Notes
       <ReactMarkdown 
         remarkPlugins={[remarkGfm]}
         components={{
-          code({node, className, children, ...props}: any) {
-            const match = /language-(w+)/.exec(className || '');
+          code({node, inline, className, children, ...props}: any) {
+            const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';
-            const isInline = !className;
             
-            if (!isInline && language === 'mermaid') {
+            // Handle inline code
+            if (inline) {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+            
+            // Handle mermaid diagrams
+            if (language === 'mermaid') {
               return (
                 <pre className="language-mermaid">
                   <code>{String(children).replace(/\n$/, '')}</code>
@@ -148,10 +153,28 @@ Notes
               );
             }
             
+            // Handle code blocks with syntax highlighting
+            if (language) {
+              return (
+                <SyntaxHighlighter
+                  language={language}
+                  style={atomDark}
+                  showLineNumbers={true}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              );
+            }
+            
+            // Default code block without highlighting
             return (
-              <code className={className} {...props}>
-                {children}
-              </code>
+              <pre>
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </pre>
             );
           }
         }}

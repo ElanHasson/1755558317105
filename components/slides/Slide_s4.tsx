@@ -2,31 +2,29 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function Slide() {
   const markdown = `- Why App Platform gets you production‑ready fast
   - Managed HTTPS and TLS certs by default; enable "Enforce HTTPS"
   - Push‑to‑deploy from GitHub/GitLab with zero‑downtime rolling updates
   - Built‑in autoscaling and health checks; one‑click rollback to a prior deploy
-
 - Security best practices
   - Store credentials as encrypted environment variables (secrets), never in code
   - Use private networking to connect to Managed Databases inside your VPC
   - Restrict exposure to only HTTP/HTTPS; terminate TLS at the edge
   - Enable preview environments only for trusted branches and clean them up after review
-
 - CI/CD best practices
   - Protect your main branch; auto‑deploy from main only
   - Turn on preview deployments for PRs to run tests and QA before merge
   - Use buildpacks or your Dockerfile; keep images minimal and pinned
   - Add a health check endpoint (e.g., /healthz) so rollouts verify readiness
-
 - Cost control best practices
   - Start with Basic tier and the smallest instance that meets baseline needs
   - Set min/max instances to cap autoscaling; right‑size using metrics
   - Use Static Sites + CDN for frontends; offload heavy state to Managed DBs
   - Regularly prune preview apps and unused components; set billing alerts
-
 - Minimal App Spec example
 \`\`\`yaml
 # app.yaml
@@ -52,7 +50,6 @@ services:
 routes:
   - path: /
 \`\`\`
-
 \`\`\`mermaid
 graph LR
   Dev[Developer push] --> GH[GitHub/GitLab]
@@ -62,7 +59,6 @@ graph LR
   Deploy --> Auto[Autoscale within limits]
   Sec[Secrets + HTTPS + VPC] -.enforced at build/deploy.-> Deploy
 \`\`\`
-
 - CLI workflow
 \`\`\`bash
 # First deploy
@@ -120,12 +116,21 @@ doctl apps update $APP_ID --spec app.yaml
       <ReactMarkdown 
         remarkPlugins={[remarkGfm]}
         components={{
-          code({node, className, children, ...props}: any) {
-            const match = /language-(w+)/.exec(className || '');
+          code({node, inline, className, children, ...props}: any) {
+            const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';
-            const isInline = !className;
             
-            if (!isInline && language === 'mermaid') {
+            // Handle inline code
+            if (inline) {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+            
+            // Handle mermaid diagrams
+            if (language === 'mermaid') {
               return (
                 <pre className="language-mermaid">
                   <code>{String(children).replace(/\n$/, '')}</code>
@@ -133,10 +138,28 @@ doctl apps update $APP_ID --spec app.yaml
               );
             }
             
+            // Handle code blocks with syntax highlighting
+            if (language) {
+              return (
+                <SyntaxHighlighter
+                  language={language}
+                  style={atomDark}
+                  showLineNumbers={true}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              );
+            }
+            
+            // Default code block without highlighting
             return (
-              <code className={className} {...props}>
-                {children}
-              </code>
+              <pre>
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </pre>
             );
           }
         }}

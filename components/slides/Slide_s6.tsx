@@ -2,6 +2,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function Slide() {
   const markdown = `- Avoid the gotchas
@@ -11,7 +13,6 @@ export default function Slide() {
   - Build/deploy surprises: Control runtime via version settings or a Dockerfile. Define build context for monorepos, use staging and deploy previews, and review build logs.
   - Networking/costs: Watch egress. Place components and databases in the same region/VPC, cache aggressively, and use a CDN for static assets.
   - Secrets/config: Never commit secrets. Use App secrets/env vars and rotate regularly.
-
 \`\`\`mermaid flowchart LR
   A[Gotcha] --> B[Ephemeral FS]
   B --> Bfix[Use Managed DBs/Redis/Spaces]
@@ -24,14 +25,12 @@ export default function Slide() {
   A --> F[Egress/region]
   F --> Ffix[Same region/VPC + CDN + cache]
 \`\`\`
-
 - Trends to watch
   - Platform engineering and golden paths
   - Serverless containers and buildpacks
   - FinOps and cost‑aware design
   - AI/LLM workloads offloaded to workers
   - Multi‑cloud portability with Dockerfile + 12‑factor
-
 - What’s next (quick checklist)
   - Import repo; choose runtime or Dockerfile
   - Attach Managed Postgres/Redis; set env/secrets
@@ -90,12 +89,21 @@ export default function Slide() {
       <ReactMarkdown 
         remarkPlugins={[remarkGfm]}
         components={{
-          code({node, className, children, ...props}: any) {
-            const match = /language-(w+)/.exec(className || '');
+          code({node, inline, className, children, ...props}: any) {
+            const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : '';
-            const isInline = !className;
             
-            if (!isInline && language === 'mermaid') {
+            // Handle inline code
+            if (inline) {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+            
+            // Handle mermaid diagrams
+            if (language === 'mermaid') {
               return (
                 <pre className="language-mermaid">
                   <code>{String(children).replace(/\n$/, '')}</code>
@@ -103,10 +111,28 @@ export default function Slide() {
               );
             }
             
+            // Handle code blocks with syntax highlighting
+            if (language) {
+              return (
+                <SyntaxHighlighter
+                  language={language}
+                  style={atomDark}
+                  showLineNumbers={true}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              );
+            }
+            
+            // Default code block without highlighting
             return (
-              <code className={className} {...props}>
-                {children}
-              </code>
+              <pre>
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </pre>
             );
           }
         }}
