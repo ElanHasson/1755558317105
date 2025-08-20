@@ -1,9 +1,8 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useEffect, useRef } from 'react';
-import mermaid from 'mermaid';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Mermaid from '../../components/Mermaid';
 
 export default function Slide() {
   const markdown = `- What actually happens from commit to scale-up
@@ -67,63 +66,6 @@ EXPOSE 8080
 CMD ["node", "server.js"]
 \`\`\`
 - Connect this repo or push a prebuilt image to DOCR and point App Platform at it`;
-  const mermaidRef = useRef(0);
-  
-  useEffect(() => {
-    mermaid.initialize({ 
-      startOnLoad: false,
-      theme: 'dark',
-      themeVariables: {
-        primaryColor: '#667eea',
-        primaryTextColor: '#fff',
-        primaryBorderColor: '#7c3aed',
-        lineColor: '#5a67d8',
-        secondaryColor: '#764ba2',
-        tertiaryColor: '#667eea',
-        background: '#1a202c',
-        mainBkg: '#2d3748',
-        secondBkg: '#4a5568',
-        tertiaryBkg: '#718096',
-        textColor: '#fff',
-        nodeTextColor: '#fff',
-      }
-    });
-    
-    // Find and render mermaid diagrams
-    const renderDiagrams = async () => {
-      const diagrams = document.querySelectorAll('.language-mermaid');
-      for (let i = 0; i < diagrams.length; i++) {
-        const element = diagrams[i] as HTMLElement;
-        const graphDefinition = element.textContent || '';
-        const id = `mermaid-${Date.now()}-${i}`;
-        
-        try {
-          // Create a container for the diagram
-          const container = document.createElement('div');
-          container.id = id;
-          container.className = 'mermaid-rendered';
-          
-          // Render the diagram
-          const { svg } = await mermaid.render(id, graphDefinition);
-          container.innerHTML = svg;
-          
-          // Replace the code block with the rendered diagram
-          if (element.parentNode) {
-            element.parentNode.replaceChild(container, element);
-          }
-        } catch (error) {
-          console.error('Mermaid rendering error:', error);
-          // If there's an error, clean up
-          const existingElement = document.getElementById(id);
-          if (existingElement) {
-            existingElement.remove();
-          }
-        }
-      }
-    };
-    
-    renderDiagrams();
-  }, [markdown]);
   
   return (
     <div className="slide markdown-slide">
@@ -147,9 +89,7 @@ CMD ["node", "server.js"]
             // Handle mermaid diagrams
             if (language === 'mermaid') {
               return (
-                <pre className="language-mermaid">
-                  <code>{String(children).replace(/\n$/, '')}</code>
-                </pre>
+                <Mermaid chart={String(children).replace(/\n$/, '')} />
               );
             }
             
