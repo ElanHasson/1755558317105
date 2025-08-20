@@ -86,7 +86,7 @@ Notes
   
   useEffect(() => {
     mermaid.initialize({ 
-      startOnLoad: true,
+      startOnLoad: false,
       theme: 'dark',
       themeVariables: {
         primaryColor: '#667eea',
@@ -108,17 +108,31 @@ Notes
     const renderDiagrams = async () => {
       const diagrams = document.querySelectorAll('.language-mermaid');
       for (let i = 0; i < diagrams.length; i++) {
-        const element = diagrams[i];
-        const graphDefinition = element.textContent;
-        const id = `mermaid-${mermaidRef.current++}`;
+        const element = diagrams[i] as HTMLElement;
+        const graphDefinition = element.textContent || '';
+        const id = `mermaid-${Date.now()}-${i}`;
         
         try {
+          // Create a container for the diagram
+          const container = document.createElement('div');
+          container.id = id;
+          container.className = 'mermaid-rendered';
+          
+          // Render the diagram
           const { svg } = await mermaid.render(id, graphDefinition);
-          element.innerHTML = svg;
-          element.classList.remove('language-mermaid');
-          element.classList.add('mermaid-rendered');
+          container.innerHTML = svg;
+          
+          // Replace the code block with the rendered diagram
+          if (element.parentNode) {
+            element.parentNode.replaceChild(container, element);
+          }
         } catch (error) {
           console.error('Mermaid rendering error:', error);
+          // If there's an error, clean up
+          const existingElement = document.getElementById(id);
+          if (existingElement) {
+            existingElement.remove();
+          }
         }
       }
     };
